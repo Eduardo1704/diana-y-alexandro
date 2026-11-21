@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pases · links de invitación</title>
+<style>
+body{margin:0;background:#F3EFE9;color:#2E1616;font:400 17px/1.5 Georgia,serif;padding:32px 16px}
+main{max-width:880px;margin:0 auto}
+h1{font-weight:400;font-size:32px;margin:0 0 8px;color:#521717}
+textarea,input{width:100%;box-sizing:border-box;font:16px/1.5 ui-monospace,Consolas,monospace;padding:12px;border:1px solid #cbbfb0;background:#fff}
+textarea{min-height:220px}
+label{display:block;margin:20px 0 6px;font-weight:600}
+button{margin-top:16px;padding:12px 22px;border:0;border-radius:999px;background:#521717;color:#F3EFE9;font:600 15px Georgia,serif;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:28px;font-size:15px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid #dcd2c5;vertical-align:top}
+td a{color:#521717;word-break:break-all}
+td button{margin:0;padding:6px 14px;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Links personalizados</h1>
+  <p>Una línea por invitación: <b>nombre, pases</b>. Cada link abre la invitación con el nombre en la portada y los lugares asignados en la confirmación.</p>
+  <label for="base">Dirección de la invitación publicada</label>
+  <input id="base">
+  <label for="list">Invitados</label>
+  <textarea id="list">Familia Betancourt, 4
+Sofía Ramírez, 2
+Andrés López, 1</textarea>
+  <button id="go" type="button">Generar links</button>
+  <table id="out" hidden>
+    <thead><tr><th>Invitación</th><th>Pases</th><th>Link</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</main>
+<script>
+const base = document.getElementById("base");
+base.value = location.href.replace(/pases\.html.*$/, "");
+document.getElementById("go").addEventListener("click", () => {
+  const tbody = document.querySelector("#out tbody");
+  tbody.replaceChildren();
+  for (const line of document.getElementById("list").value.split(/\n/)) {
+    const m = line.match(/^\s*(.+?)\s*[,;\t]\s*(\d+)\s*$/);
+    if (!m) continue;
+    const [, name, n] = m;
+    const url = base.value.trim() + "?nombre=" + encodeURIComponent(name) + "&pases=" + n;
+    const msg = `${name}, con mucho cariño te compartimos nuestra invitación de boda. Hemos reservado ${n} ${n === "1" ? "lugar" : "lugares"} para ti: ${url}`;
+    const tr = tbody.insertRow();
+    tr.insertCell().textContent = name;
+    tr.insertCell().textContent = n;
+    const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.textContent = url;
+    tr.insertCell().append(a);
+    const b = document.createElement("button"); b.type = "button"; b.textContent = "Copiar mensaje";
+    b.onclick = () => navigator.clipboard.writeText(msg).then(() => b.textContent = "Copiado");
+    tr.insertCell().append(b);
+  }
+  document.getElementById("out").hidden = !tbody.rows.length;
+});
+</script>
+</body>
+</html>
